@@ -35,8 +35,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     }
     setLoading(true);
     setError('');
+    const targetEmail = 'eletricistaarthur@gmail.com';
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      if (user.email?.toLowerCase() !== targetEmail.toLowerCase()) {
+        await auth.signOut();
+        setError(`Acesso negado. Apenas o email ${targetEmail} pode entrar.`);
+        return;
+      }
+      
       onLoginSuccess();
     } catch (err: any) {
       console.error('LandingPage Google Login error:', err);

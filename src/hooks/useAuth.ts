@@ -18,8 +18,15 @@ export function useAuth() {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      const targetEmail = 'eletricistaarthur@gmail.com';
+      if (currentUser && currentUser.email && currentUser.email.toLowerCase() !== targetEmail.toLowerCase()) {
+        console.warn('Unauthorized user detected, logging out:', currentUser.email);
+        await firebaseLogout();
+        setUser(null);
+      } else {
+        setUser(currentUser);
+      }
       setLoading(false);
       clearTimeout(timeout);
     });
