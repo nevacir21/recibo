@@ -226,22 +226,22 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-8" id="receipt-form">
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-8 space-y-6 md:space-y-8" id="receipt-form">
       {/* Type Toggle */}
-      <div className="flex p-1 bg-gray-100 rounded-xl w-fit">
+      <div className="flex p-1 bg-gray-100 rounded-xl w-full md:w-fit">
         <button
           type="button"
           onClick={() => setType('service')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${
+          className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg text-xs font-bold transition-all ${
             type === 'service' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'
           }`}
         >
-          SERVIÇO REALIZADO
+          SERVIÇO
         </button>
         <button
           type="button"
           onClick={() => setType('estimate')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${
+          className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg text-xs font-bold transition-all ${
             type === 'estimate' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -249,7 +249,7 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
         {/* Company Info - Read Only if Profile exists, or editable otherwise */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -341,56 +341,58 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
         
         <div className="space-y-4">
           {services.map((service, index) => (
-            <div key={service.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 bg-gray-50/50 rounded-2xl border border-gray-100 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div key={service.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 md:p-4 bg-gray-50/50 rounded-2xl border border-gray-100 animate-in fade-in slide-in-from-top-1 duration-200">
               <div className="md:col-span-8 space-y-4">
                 <div className="relative">
-                  <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Descrição</label>
+                  <label className="block text-[10px] md:text-xs font-semibold text-gray-400 uppercase mb-1">Descrição do Serviço</label>
                   <textarea
                     value={service.description}
                     onChange={(e) => updateServiceDescription(index, e.target.value)}
                     placeholder="Descreva o serviço realizado..."
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all h-24 resize-none bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all h-24 resize-none bg-white text-sm"
                   />
                   {services.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeService(index)}
-                      className="absolute top-6 right-2 p-1 text-gray-300 hover:text-red-500 transition-colors"
+                      className="absolute top-7 right-2 p-1.5 text-gray-300 hover:text-red-500 transition-colors"
                     >
                       <Trash2 size={16} />
                     </button>
                   )}
                 </div>
                 
-                <div className="w-full md:w-1/2">
-                  <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Valor do Serviço</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-gray-500 text-sm">R$</span>
-                    <input
-                      type="number"
-                      value={service.value || ''}
-                      onChange={(e) => updateServiceValue(index, e.target.value === '' ? undefined : Number(e.target.value))}
-                      placeholder="0,00"
-                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all bg-white text-sm"
-                    />
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-[10px] md:text-xs font-semibold text-gray-400 uppercase mb-1">Valor Unitário</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-gray-500 text-sm">R$</span>
+                      <input
+                        type="number"
+                        value={service.value || ''}
+                        onChange={(e) => updateServiceValue(index, e.target.value === '' ? undefined : Number(e.target.value))}
+                        placeholder="0,00"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all bg-white text-sm"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className="md:col-span-4 space-y-4">
-                <label className="block text-xs font-semibold text-gray-400 uppercase">Fotos do Serviço</label>
+              <div className="md:col-span-4 space-y-3">
+                <label className="block text-[10px] md:text-xs font-semibold text-gray-400 uppercase">Fotos de Registro</label>
                 
                 <div className="grid grid-cols-2 gap-3">
                   {/* Antes */}
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Antes</span>
+                    <span className="text-[9px] font-bold text-gray-400 uppercase ml-1">Antes</span>
                     {service.photoBefore ? (
                       <div className="relative group w-full aspect-square">
                         <img src={service.photoBefore} alt="Antes" className="w-full h-full object-cover rounded-xl border border-gray-100 shadow-sm" />
                         <button
                           type="button"
                           onClick={() => removeServicePhoto(index, 'before')}
-                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute -top-1.5 -right-1.5 p-1.5 bg-red-500 text-white rounded-full shadow-lg transition-opacity"
                         >
                           <X size={10} />
                         </button>
@@ -419,14 +421,14 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
 
                   {/* Depois */}
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Após</span>
+                    <span className="text-[9px] font-bold text-gray-400 uppercase ml-1">Após</span>
                     {service.photoAfter ? (
                       <div className="relative group w-full aspect-square">
                         <img src={service.photoAfter} alt="Após" className="w-full h-full object-cover rounded-xl border border-gray-100 shadow-sm" />
                         <button
                           type="button"
                           onClick={() => removeServicePhoto(index, 'after')}
-                          className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute -top-1.5 -right-1.5 p-1.5 bg-red-500 text-white rounded-full shadow-lg transition-opacity"
                         >
                           <X size={10} />
                         </button>
@@ -659,21 +661,30 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
       </section>
 
       {/* Footer / Summary */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-top border-gray-100">
-        <div className="text-center md:text-left">
-          <p className="text-sm text-gray-500 mb-1">Valor Total Estimado</p>
-          <p className="text-4xl font-light tracking-tight text-gray-900">{formatCurrency(calculateTotal())}</p>
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 md:pt-8 border-t border-gray-100">
+        <div className="w-full md:w-auto text-center md:text-left bg-gray-50 md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none">
+          <p className="text-[10px] md:text-sm text-gray-500 uppercase font-black tracking-widest mb-1">Total do Recibo</p>
+          <p className="text-3xl md:text-4xl font-black tracking-tight text-gray-900">{formatCurrency(calculateTotal())}</p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="w-full md:w-auto flex items-center gap-4">
           <button
             type="submit"
             disabled={isSaving}
-            className="flex items-center gap-2 px-8 py-4 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-5 md:py-4 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed uppercase font-black italic tracking-widest"
             id="generate-pdf-button"
           >
-            <FileDown size={20} />
-            <span>{isSaving ? 'Salvando...' : (initialData ? 'Salvar Alterações' : 'Salvar e Gerar PDF')}</span>
+            {isSaving ? (
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                Salvando...
+              </span>
+            ) : (
+              <>
+                <FileDown size={20} />
+                <span>{initialData ? 'Atualizar' : 'Gerar Recibo'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>

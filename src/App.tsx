@@ -64,10 +64,10 @@ export default function App() {
         </div>
       )}
 
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      {/* Navbar - Desktop Only */}
+      <nav className="hidden md:block sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white">
               <ReceiptIcon size={24} />
             </div>
@@ -80,10 +80,21 @@ export default function App() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-6 py-8 md:py-12">
-        <div className="space-y-10">
-          {/* Header & Main Tabs */}
-          <div className="flex flex-col gap-8">
+      {/* Mobile Header */}
+      <header className="md:hidden bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">
+            <ReceiptIcon size={18} />
+          </div>
+          <h1 className="text-lg font-bold tracking-tight">Recibo<span className="text-gray-400">Pro</span></h1>
+        </div>
+        <Auth />
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-12 pb-32 md:pb-12">
+        <div className="space-y-6 md:space-y-10">
+          {/* Header & Main Tabs - Desktop Only */}
+          <div className="hidden md:flex flex-col gap-8">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tight">
                 {activeTab === 'create' && 'Emitir Novo Recibo'}
@@ -134,8 +145,17 @@ export default function App() {
             </div>
           </div>
 
+          {/* Mobile Title */}
+          <div className="md:hidden mb-2">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {activeTab === 'create' && 'Emitir Recibo'}
+              {activeTab === 'history' && 'Meu Histórico'}
+              {activeTab === 'settings' && 'Meu Perfil'}
+            </h2>
+          </div>
+
           {/* Content Area */}
-          <div className="min-h-[500px]">
+          <div className="min-h-[400px]">
             <AnimatePresence mode="wait">
               {activeTab === 'create' && (
                 <motion.div
@@ -179,7 +199,61 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="py-12 border-t border-gray-100 mt-20">
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 px-6 py-3 pb-8 flex justify-around items-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <button
+          onClick={() => {
+            setEditingReceipt(null);
+            setActiveTab('create');
+          }}
+          className={cn(
+            "flex flex-col items-center gap-1 transition-all",
+            activeTab === 'create' ? "text-black" : "text-gray-400"
+          )}
+        >
+          <div className={cn(
+            "p-2 rounded-xl transition-all",
+            activeTab === 'create' ? "bg-yellow-400 text-black shadow-lg shadow-yellow-200" : "bg-transparent"
+          )}>
+            <FilePlus size={20} />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Emitir</span>
+        </button>
+        
+        <button
+          onClick={() => setActiveTab('history')}
+          className={cn(
+            "flex flex-col items-center gap-1 transition-all",
+            activeTab === 'history' ? "text-black" : "text-gray-400"
+          )}
+        >
+          <div className={cn(
+            "p-2 rounded-xl transition-all",
+            activeTab === 'history' ? "bg-yellow-400 text-black shadow-lg shadow-yellow-200" : "bg-transparent"
+          )}>
+            <History size={20} />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Histórico</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={cn(
+            "flex flex-col items-center gap-1 transition-all",
+            activeTab === 'settings' ? "text-black" : "text-gray-400"
+          )}
+        >
+          <div className={cn(
+            "p-2 rounded-xl transition-all",
+            activeTab === 'settings' ? "bg-yellow-400 text-black shadow-lg shadow-yellow-200" : "bg-transparent"
+          )}>
+            <UserCircle size={20} />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Perfil</span>
+        </button>
+      </nav>
+
+      <footer className="hidden md:block py-12 border-t border-gray-100 mt-20">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400 font-medium">
           <p>RECIBO PRO © 2026. Desenvolvido para Prestadores de Serviços.</p>
           <div className="flex gap-6">

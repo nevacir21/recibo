@@ -221,17 +221,17 @@ export const ReceiptList: React.FC<ReceiptListProps> = ({ userId, onEdit }) => {
                   </div>
 
                   <div className="flex items-center justify-between border-t border-gray-50 pt-4 mt-auto">
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 md:gap-2">
                       <button
                         onClick={() => onEdit?.(receipt)}
-                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                        className="p-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
                         title="Editar"
                       >
                         <Edit2 size={16} />
                       </button>
                       <button
                         onClick={() => handleDelete(receipt.id)}
-                        className={`p-2 rounded-lg transition-all flex items-center gap-2 ${
+                        className={`p-2.5 rounded-lg transition-all flex items-center gap-2 ${
                           confirmingDelete === receipt.id 
                             ? 'bg-red-500 text-white animate-pulse' 
                             : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
@@ -245,20 +245,20 @@ export const ReceiptList: React.FC<ReceiptListProps> = ({ userId, onEdit }) => {
                       {receipt.type === 'estimate' && (
                         <button
                           onClick={() => handleConvertToService(receipt)}
-                          className="flex items-center gap-1 px-3 py-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all text-[11px] font-bold"
+                          className="flex items-center gap-1 px-3 py-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all text-[10px] md:text-[11px] font-black uppercase italic"
                           title="Transformar em Serviço Realizado"
                         >
                           <CheckCircle2 size={14} />
-                          CONCLUIR
+                          <span className="hidden xs:inline">CONCLUIR</span>
                         </button>
                       )}
                     </div>
                     <button
                       onClick={async () => await generateReceiptPDF(receipt)}
-                      className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 rounded-xl hover:bg-black hover:text-white transition-all text-sm font-medium"
+                      className="flex items-center gap-2 px-4 py-3 md:py-2 bg-yellow-400 text-black rounded-xl hover:bg-yellow-500 transition-all text-[11px] font-black uppercase italic shadow-lg shadow-yellow-100"
                     >
-                      <Download size={16} />
-                      Baixar PDF
+                      <Download size={14} />
+                      <span>Baixar</span>
                     </button>
                   </div>
                 </motion.div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Save, Building, Info, CheckCircle2, Camera, X } from 'lucide-react';
+import { Save, Building, Info, CheckCircle2, Camera, X, Loader2 } from 'lucide-react';
 import { useCompanyProfile } from '../hooks/useCompanyProfile';
+import { compressImage } from '../lib/utils';
 
 export const CompanySettings: React.FC = () => {
   const { profile, saveProfile } = useCompanyProfile();
@@ -9,15 +10,24 @@ export const CompanySettings: React.FC = () => {
   const [pixKey, setPixKey] = useState(profile.pixKey || '');
   const [logo, setLogo] = useState(profile.logo || '');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setUploading(true);
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setLogo(reader.result as string);
+    reader.onloadend = async () => {
+      try {
+        const compressed = await compressImage(reader.result as string);
+        setLogo(compressed);
+      } catch (err) {
+        console.error('Error compressing logo:', err);
+      } finally {
+        setUploading(false);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -30,19 +40,19 @@ export const CompanySettings: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-gray-100 shadow-sm p-4 md:p-8 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="space-y-2">
-        <h3 className="text-2xl font-bold flex items-center gap-2">
+        <h3 className="text-xl md:text-2xl font-black flex items-center gap-2 uppercase tracking-tighter italic">
           <Building className="text-gray-400" />
-          Cadastro do Prestador
+          Minha Empresa
         </h3>
-        <p className="text-gray-500 text-sm">
-          Estes dados serão usados automaticamente no cabeçalho de todos os seus recibos.
+        <p className="text-gray-500 text-xs md:text-sm">
+          Esses dados aparecem no topo dos seus recibos.
         </p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50 hover:bg-gray-50 transition-colors">
             {logo ? (
               <div className="relative group">
@@ -50,7 +60,7 @@ export const CompanySettings: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setLogo('')}
-                  className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg transition-opacity"
                 >
                   <X size={14} />
                 </button>
@@ -58,13 +68,16 @@ export const CompanySettings: React.FC = () => {
             ) : (
               <button
                 type="button"
+                disabled={uploading}
                 onClick={() => fileInputRef.current?.click()}
-                className="w-32 h-32 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-black transition-all"
+                className="w-full h-32 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-black transition-all"
               >
                 <div className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
-                  <Camera size={32} />
+                  {uploading ? <Loader2 size={32} className="animate-spin" /> : <Camera size={31} />}
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest mt-1">Logo da Empresa</span>
+                <span className="text-[10px] font-black uppercase tracking-widest mt-1 italic">
+                  {uploading ? 'Processando...' : 'Carregar Sua Logo'}
+                </span>
               </button>
             )}
             <input
@@ -76,59 +89,55 @@ export const CompanySettings: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Nome da Sua Empresa</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ex: Arthur Elétrica & Manutenção"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all font-medium"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Chave PIX (opcional para QR Code)</label>
-            <input
-              type="text"
-              value={pixKey}
-              onChange={(e) => setPixKey(e.target.value)}
-              placeholder="E-mail, CPF, CNPJ ou Celular"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all font-medium"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Dados Detalhados</label>
-            <textarea
-              value={details}
-              onChange={(e) => setDetails(e.target.value)}
-              placeholder="Ex: CNPJ: 12.345.678/0001-90&#10;Endereço: Rua dos Eletricistas, 456&#10;Telefone: (11) 98888-7777"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all h-40 resize-none"
-              required
-            />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-1">Nome Profissional</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ex: Arthur Eletricista"
+                className="w-full px-4 py-4 rounded-2xl border border-gray-100 focus:border-yellow-400 outline-none transition-all font-bold text-gray-900 bg-gray-50 focus:bg-white"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-1">Chave PIX (Para Pagamento)</label>
+              <input
+                type="text"
+                value={pixKey}
+                onChange={(e) => setPixKey(e.target.value)}
+                placeholder="Seu Pix para o recibo"
+                className="w-full px-4 py-4 rounded-2xl border border-gray-100 focus:border-yellow-400 outline-none transition-all font-bold text-gray-900 bg-gray-50 focus:bg-white"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-1">Dados de Contato / Endereço / CNPJ</label>
+              <textarea
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+                placeholder="Digite aqui o que quer que apareça no recibo"
+                className="w-full px-4 py-4 rounded-2xl border border-gray-100 focus:border-yellow-400 outline-none transition-all h-40 resize-none font-bold text-gray-900 bg-gray-50 focus:bg-white"
+                required
+              />
+            </div>
           </div>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-2xl flex gap-3 text-sm text-gray-600">
-          <Info className="text-gray-400 flex-shrink-0" size={18} />
-          <p>Dica: Os dados salvos aqui serão aplicados instantaneamente em seus próximos recibos.</p>
-        </div>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4">
+          <div className="hidden md:flex flex-1 gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+            <Info className="flex-shrink-0" size={14} />
+            <p>Seus dados são salvos com segurança.</p>
+          </div>
 
-        <div className="flex items-center justify-between pt-4">
-          {showSuccess && (
-            <span className="flex items-center gap-1.5 text-green-600 text-sm font-bold animate-in fade-in zoom-in shrink-0">
-              <CheckCircle2 size={16} />
-              Salvo com sucesso!
-            </span>
-          )}
           <button
             type="submit"
-            className="ml-auto flex items-center gap-2 px-8 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all shadow-md active:scale-95"
+            className="w-full md:w-auto flex items-center justify-center gap-2 px-10 py-5 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-gray-100 uppercase font-black italic tracking-[0.1em]"
           >
             <Save size={18} />
-            <span>Salvar Cadastro</span>
+            <span>Salvar Tudo</span>
           </button>
         </div>
       </form>

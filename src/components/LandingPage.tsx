@@ -118,26 +118,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
               <ClipboardList className="text-black hidden md:block" size={42} />
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
               {/* Left Column Content */}
-              <div className="space-y-8">
+              <div className="space-y-6 md:space-y-8">
                 {/* Main Logo Area */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 md:gap-4">
                     <div className="relative">
-                      <Zap size={80} className="text-yellow-400 fill-yellow-400" />
+                      <Zap className="w-16 h-16 md:w-20 md:h-20 text-yellow-400 fill-yellow-400" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                         <span className="text-6xl font-black italic scale-x-125 mb-1 mr-1">A</span>
+                         <span className="text-4xl md:text-6xl font-black italic scale-x-125 mb-1 mr-1 text-black md:text-white">A</span>
                       </div>
                     </div>
                     <div>
-                      <h1 className="text-6xl md:text-7xl font-black tracking-tight leading-none uppercase italic">Arthur</h1>
+                      <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none uppercase italic">Arthur</h1>
                       <div className="flex items-center gap-2">
                         <div className="h-[2px] flex-1 bg-yellow-400"></div>
-                        <span className="text-yellow-400 text-3xl font-black tracking-[0.2em] uppercase">Eletricista</span>
+                        <span className="text-yellow-400 text-xl md:text-3xl font-black tracking-[0.2em] uppercase">Eletricista</span>
                         <div className="h-[2px] flex-1 bg-yellow-400"></div>
                       </div>
-                      <p className="text-sm font-bold tracking-[0.5em] uppercase text-center mt-1">E Manutenção</p>
                     </div>
                   </div>
                 </div>
