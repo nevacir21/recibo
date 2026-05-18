@@ -4,7 +4,7 @@ import { useCompanyProfile } from '../hooks/useCompanyProfile';
 import { compressImage } from '../lib/utils';
 
 export const CompanySettings: React.FC = () => {
-  const { profile, saveProfile } = useCompanyProfile();
+  const { profile, saveProfile, loading: profileLoading } = useCompanyProfile();
   const [name, setName] = useState(profile.name);
   const [details, setDetails] = useState(profile.details);
   const [pixKey, setPixKey] = useState(profile.pixKey || '');
@@ -13,6 +13,23 @@ export const CompanySettings: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Sync local state when profile loads from Firebase
+  React.useEffect(() => {
+    if (profile.name) setName(profile.name);
+    if (profile.details) setDetails(profile.details);
+    if (profile.pixKey) setPixKey(profile.pixKey);
+    if (profile.logo) setLogo(profile.logo);
+  }, [profile]);
+
+  if (profileLoading && !profile.name) {
+    return (
+      <div className="max-w-2xl mx-auto p-12 flex flex-col items-center justify-center gap-4">
+        <Loader2 className="animate-spin text-yellow-400" size={40} />
+        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Carregando dados da empresa...</p>
+      </div>
+    );
+  }
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
