@@ -198,19 +198,25 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
     setIsSaving(true);
     const total = calculateTotal();
 
-    const receiptData: any = {
+    // Create a clean object for Firestore, ensuring no 'undefined' values
+    const receiptData = {
       type,
-      companyName,
-      companyDetails,
-      clientName,
+      companyName: companyName || '',
+      companyDetails: companyDetails || '',
+      clientName: clientName || '',
       services: services.filter(s => s.description.trim() !== '').map(s => ({
-        ...s,
-        value: s.value ?? 0,
-        photoBefore: s.photoBefore ?? null,
-        photoAfter: s.photoAfter ?? null
+        id: s.id,
+        description: s.description || '',
+        value: Number(s.value) || 0,
+        photoBefore: s.photoBefore || null,
+        photoAfter: s.photoAfter || null
       })),
       laborCost: Number(laborCost) || 0,
-      parts: parts.map(p => ({ ...p, price: Number(p.price) || 0 })),
+      parts: parts.map(p => ({
+        id: p.id,
+        name: p.name || '',
+        price: Number(p.price) || 0
+      })),
       expenses: {
         gasoline: Number(expenses.gasoline) || 0,
         toll: Number(expenses.toll) || 0,
@@ -218,14 +224,14 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
       },
       total,
       createdAt: new Date().toISOString(),
-      serviceDate,
-      osNumber,
-      mileageInitial: mileageInitial === '' ? null : Number(mileageInitial),
-      mileageFinal: mileageFinal === '' ? null : Number(mileageFinal),
-      dashboardPhoto: dashboardPhoto ?? null,
-      companyLogo: profile.logo ?? null,
-      pixKey: profile.pixKey ?? null,
-      userId,
+      serviceDate: serviceDate || new Date().toISOString().split('T')[0],
+      osNumber: osNumber || '',
+      mileageInitial: (mileageInitial === '' || mileageInitial === null || mileageInitial === undefined) ? null : Number(mileageInitial),
+      mileageFinal: (mileageFinal === '' || mileageFinal === null || mileageFinal === undefined) ? null : Number(mileageFinal),
+      dashboardPhoto: dashboardPhoto || null,
+      companyLogo: profile.logo || null,
+      pixKey: profile.pixKey || null,
+      userId: userId || '',
     };
 
     try {
@@ -242,6 +248,7 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
             });
           } catch (error) {
             handleFirestoreError(error, OperationType.UPDATE, `receipts/${initialData.id}`);
+            return; // Stop execution if Firestore fails
           }
         } else {
           try {
@@ -251,6 +258,7 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
             });
           } catch (error) {
             handleFirestoreError(error, OperationType.CREATE, 'receipts');
+            return; // Stop execution if Firestore fails
           }
         }
       } else {
@@ -281,8 +289,11 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
       setMileageFinal('');
       setDashboardPhoto(undefined);
     } catch (error) {
-      console.error('Error saving receipt:', error);
-      alert('Recibo foi baixado, mas houve um erro ao salvar no histórico.');
+      console.error('Error generating/saving receipt:', error);
+      // If we got here, it might be a PDF error or a general logic error
+      if (!String(error).includes('Firestore Error')) {
+        alert('Ocorreu um erro inesperado. O PDF pode não ter sido gerado ou o histórico não foi salvo.');
+      }
     } finally {
       setIsSaving(false);
     }
