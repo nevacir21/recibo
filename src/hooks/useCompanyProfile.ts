@@ -50,17 +50,27 @@ export function useCompanyProfile() {
   }, [user]);
 
   const saveProfile = async (newProfile: CompanyProfile) => {
-    if (!user || !db) return;
+    if (!user || !db) {
+      alert('Sistema não inicializado ou usuário não logado.');
+      return;
+    }
 
     try {
       const docRef = doc(db, 'company_profiles', user.uid);
       const profileToSave = { ...newProfile, userId: user.uid };
+      
+      console.log('Tentando salvar perfil:', profileToSave);
+      
       await setDoc(docRef, profileToSave);
       setProfile(profileToSave);
-      // Also keep local storage for fallback/speed? Maybe not needed if we have firestore
       localStorage.setItem('company_profile', JSON.stringify(profileToSave));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving profile:', error);
+      if (error.message?.includes('Insufficient permissions')) {
+        alert('Erro de permissão: Você não tem autorização para salvar o perfil da empresa. Verifique se seu login é válido.');
+      } else {
+        alert('Erro ao salvar dados da empresa: ' + (error.message || 'Erro desconhecido'));
+      }
       throw error;
     }
   };

@@ -120,8 +120,9 @@ export const ReceiptList: React.FC<ReceiptListProps> = ({ userId, onEdit }) => {
         localStorage.setItem('receipts_fallback', JSON.stringify(updated));
         setReceipts(updated);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating receipt:', error);
+      alert('Erro ao atualizar: ' + (error.message || 'Erro desconhecido'));
     }
   };
 

@@ -2,11 +2,53 @@ import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Save, FileDown, PlusCircle, Building2, Camera, X } from 'lucide-react';
 import { Part, Receipt, Expenses, ServiceItem } from '../types';
 import { formatCurrency } from '../lib/utils';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { generateReceiptPDF } from '../lib/pdfGenerator';
 import { useCompanyProfile } from '../hooks/useCompanyProfile';
+
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth?.currentUser?.uid,
+      email: auth?.currentUser?.email,
+      emailVerified: auth?.currentUser?.emailVerified,
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  
+  if (errInfo.error.includes('Insufficient permissions')) {
+    alert('Erro de permissão: Você não tem autorização para salvar estes dados. Verifique se está logado corretamente.');
+  } else {
+    alert(`Erro ao salvar no banco de dados: ${errInfo.error.substring(0, 100)}...`);
+  }
+  
+  throw new Error(JSON.stringify(errInfo));
+}
 
 interface ReceiptFormProps {
   userId: string;
@@ -188,15 +230,23 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
       // Save to DB in background if configured
       if (db) {
         if (initialData?.id) {
-          await updateDoc(doc(db, 'receipts', initialData.id), {
-            ...receiptData,
-            updatedAt: serverTimestamp(),
-          });
+          try {
+            await updateDoc(doc(db, 'receipts', initialData.id), {
+              ...receiptData,
+              updatedAt: serverTimestamp(),
+            });
+          } catch (error) {
+            handleFirestoreError(error, OperationType.UPDATE, `receipts/${initialData.id}`);
+          }
         } else {
-          await addDoc(collection(db, 'receipts'), {
-            ...receiptData,
-            createdAt: serverTimestamp(),
-          });
+          try {
+            await addDoc(collection(db, 'receipts'), {
+              ...receiptData,
+              createdAt: serverTimestamp(),
+            });
+          } catch (error) {
+            handleFirestoreError(error, OperationType.CREATE, 'receipts');
+          }
         }
       } else {
         // Fallback for local storage if Firebase is not configured

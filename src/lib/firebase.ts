@@ -24,7 +24,18 @@ export const db = app ? getFirestore(app, firebaseConfig.firestoreDatabaseId) : 
 export const auth = app ? getAuth(app) : null as any;
 export const googleProvider = new GoogleAuthProvider();
 
-export const signInWithGoogle = () => auth ? signInWithPopup(auth, googleProvider) : Promise.reject('Firebase not configured');
+export const signInWithGoogle = async () => {
+  if (!auth) throw new Error('Firebase not configured');
+  try {
+    return await signInWithPopup(auth, googleProvider);
+  } catch (error: any) {
+    console.error('Login Error details:', error);
+    if (error.code === 'auth/unauthorized-domain') {
+      throw new Error('Este domínio não está autorizado no Console Firebase. Adicione o link do Vercel em Authentication > Settings > Authorized Domains.');
+    }
+    throw error;
+  }
+};
 export const logout = () => auth ? signOut(auth) : Promise.reject('Firebase not configured');
 
 export { isConfigValid };

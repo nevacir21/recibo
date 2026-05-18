@@ -11,6 +11,7 @@ export const CompanySettings: React.FC = () => {
   const [logo, setLogo] = useState(profile.logo || '');
   const [showSuccess, setShowSuccess] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,11 +33,19 @@ export const CompanySettings: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveProfile({ name, details, pixKey, logo });
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+    setIsSaving(true);
+    try {
+      await saveProfile({ name, details, pixKey, logo });
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+      // Alert is already handled inside saveProfile hook now
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -46,9 +55,12 @@ export const CompanySettings: React.FC = () => {
           <Building className="text-gray-400" />
           Minha Empresa
         </h3>
-        <p className="text-gray-500 text-xs md:text-sm">
-          Esses dados aparecem no topo dos seus recibos.
-        </p>
+        {showSuccess && (
+          <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-xl animate-in zoom-in duration-200">
+            <CheckCircle2 size={20} />
+            <span className="text-sm font-bold uppercase italic tracking-tighter">Dados salvos com sucesso!</span>
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
@@ -129,15 +141,16 @@ export const CompanySettings: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4">
           <div className="hidden md:flex flex-1 gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
             <Info className="flex-shrink-0" size={14} />
-            <p>Seus dados são salvos com segurança.</p>
+            <p>Seus dados são salvos com segurança no histórico.</p>
           </div>
 
           <button
             type="submit"
-            className="w-full md:w-auto flex items-center justify-center gap-2 px-10 py-5 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-gray-100 uppercase font-black italic tracking-[0.1em]"
+            disabled={isSaving}
+            className="w-full md:w-auto flex items-center justify-center gap-2 px-10 py-5 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-gray-100 uppercase font-black italic tracking-[0.1em] disabled:opacity-50"
           >
-            <Save size={18} />
-            <span>Salvar Tudo</span>
+            {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+            <span>{isSaving ? 'Salvando...' : 'Salvar Tudo'}</span>
           </button>
         </div>
       </form>
