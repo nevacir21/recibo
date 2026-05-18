@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LogIn, Lock, User, ArrowRight, Zap, Phone, Mail, CheckCircle2, 
   Settings, ShieldCheck, Home, Lightbulb, Clock, Handshake,
@@ -92,7 +92,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
   };
 
   // Auto-submit if PIN reaches 6 digits
-  React.useEffect(() => {
+  useEffect(() => {
     if (pin.length === 6) {
       handleAuth();
     }
@@ -100,13 +100,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
 
   return (
     <div className="min-h-screen bg-[#0a1118] text-white font-sans selection:bg-yellow-400 selection:text-black">
-      <AnimatePresence mode="wait">
         {!showLogin ? (
           <motion.div
             key="landing"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, y: -20 }}
             className="relative"
           >
             {/* Upper Header bar */}
@@ -367,7 +365,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
     </div>
   );
 };

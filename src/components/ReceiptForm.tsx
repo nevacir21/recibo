@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Save, FileDown, PlusCircle, Building2, Camera, X } from 'lucide-react';
 import { Part, Receipt, Expenses, ServiceItem } from '../types';
 import { formatCurrency } from '../lib/utils';
@@ -20,7 +20,15 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
   const [companyName, setCompanyName] = useState(initialData ? initialData.companyName : profile.name);
   const [companyDetails, setCompanyDetails] = useState(initialData ? initialData.companyDetails : profile.details);
   const [clientName, setClientName] = useState(initialData?.clientName || '');
-  const [services, setServices] = useState<ServiceItem[]>(initialData?.services || [{ id: crypto.randomUUID(), description: 'Manutenção em geral' }]);
+  const generateId = () => {
+    try {
+      return crypto.randomUUID();
+    } catch (e) {
+      return Math.random().toString(36).substring(2, 15);
+    }
+  };
+
+  const [services, setServices] = useState<ServiceItem[]>(initialData?.services || [{ id: generateId(), description: 'Manutenção em geral' }]);
   const [laborCost, setLaborCost] = useState<number | ''>(initialData?.laborCost || '');
   const [parts, setParts] = useState<Part[]>(initialData?.parts || []);
   const [expenses, setExpenses] = useState<{ gasoline: number | ''; toll: number | ''; other: number | '' }>(
@@ -70,7 +78,7 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
   }, [profile, initialData]);
 
   const addPart = () => {
-    setParts([...parts, { id: crypto.randomUUID(), name: '', price: 0 }]);
+    setParts([...parts, { id: generateId(), name: '', price: 0 }]);
   };
 
   const updatePart = (index: number, field: keyof Part, value: string | number) => {
@@ -111,7 +119,7 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
   };
 
   const addService = () => {
-    setServices([...services, { id: crypto.randomUUID(), description: '' }]);
+    setServices([...services, { id: generateId(), description: '' }]);
   };
 
   const updateServiceDescription = (index: number, value: string) => {
@@ -200,7 +208,7 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
           );
           localStorage.setItem('receipts_fallback', JSON.stringify(updated));
         } else {
-          const newReceipt = { ...receiptData, id: crypto.randomUUID() };
+          const newReceipt = { ...receiptData, id: generateId() };
           localStorage.setItem('receipts_fallback', JSON.stringify([newReceipt, ...localReceipts]));
         }
       }
@@ -212,7 +220,7 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
       setExpenses({ gasoline: '', toll: '', other: '' });
       setLaborCost('');
       setType('service');
-      setServices([{ id: crypto.randomUUID(), description: 'Manutenção em geral' }]);
+      setServices([{ id: generateId(), description: 'Manutenção em geral' }]);
       setOsNumber(`OS-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`);
       setMileageInitial('');
       setMileageFinal('');

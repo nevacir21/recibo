@@ -43,9 +43,16 @@ export const ReceiptList: React.FC<ReceiptListProps> = ({ userId, onEdit }) => {
         const docs = snapshot.docs.map(doc => {
           const data = doc.data();
           // Handle serverTimestamp still being processed by the server
-          const createdAt = data.createdAt instanceof Timestamp 
-            ? data.createdAt.toDate().toISOString() 
-            : (typeof data.createdAt === 'string' ? data.createdAt : new Date().toISOString());
+          let createdAt: string;
+          if (data.createdAt instanceof Timestamp) {
+            createdAt = data.createdAt.toDate().toISOString();
+          } else if (typeof data.createdAt === 'string') {
+            createdAt = data.createdAt;
+          } else if (data.createdAt && typeof data.createdAt === 'object' && 'seconds' in data.createdAt) {
+            createdAt = new Date((data.createdAt as any).seconds * 1000).toISOString();
+          } else {
+            createdAt = new Date().toISOString();
+          }
 
           return {
             id: doc.id,
@@ -178,7 +185,18 @@ export const ReceiptList: React.FC<ReceiptListProps> = ({ userId, onEdit }) => {
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                           <Calendar size={12} />
-                          {format(new Date((receipt.serviceDate || receipt.createdAt).replace(/-/g, '/')), "dd 'de' MMM, yyyy", { locale: ptBR })}
+                          {(() => {
+                            const dateStr = receipt.serviceDate || receipt.createdAt;
+                            try {
+                              // If YYYY-MM-DD, use / to avoid timezone shift
+                              const date = /^\d{4}-\d{2}-\d{2}$/.test(dateStr) 
+                                ? new Date(dateStr.replace(/-/g, '/'))
+                                : new Date(dateStr);
+                              return format(date, "dd 'de' MMM, yyyy", { locale: ptBR });
+                            } catch (e) {
+                              return dateStr;
+                            }
+                          })()}
                           <span>•</span>
                           <span className="font-medium text-gray-700">{receipt.companyName}</span>
                         </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Auth } from './components/Auth';
 import { ReceiptForm } from './components/ReceiptForm';
 import { ReceiptList } from './components/ReceiptList';
@@ -12,35 +12,70 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './lib/utils';
 import { Receipt } from './types';
 
+// Simple Error Boundary component
+function ErrorFallback({ error }: { error: Error }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-red-50 p-6">
+      <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-red-100 text-center space-y-4">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
+          <AlertCircle size={32} />
+        </div>
+        <h2 className="text-2xl font-black text-gray-900 uppercase italic">Ops! Algo deu errado</h2>
+        <p className="text-gray-500 text-sm">Ocorreu um erro inesperado. Tente recarregar a página.</p>
+        <pre className="text-[10px] bg-gray-50 p-4 rounded-xl overflow-auto text-left text-red-500 font-mono">
+          {error.message}
+        </pre>
+        <button 
+          onClick={() => window.location.reload()}
+          className="w-full py-4 bg-black text-white rounded-2xl font-black uppercase tracking-widest italic"
+        >
+          Recarregar
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const { user, loading } = useAuth();
-  const { profile } = useCompanyProfile();
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useCompanyProfile();
   const [activeTab, setActiveTab] = useState<'create' | 'history' | 'settings'>('create');
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
+  const [renderError, setRenderError] = useState<Error | null>(null);
 
-  const handleEdit = (receipt: Receipt) => {
+  const handleEdit = useCallback((receipt: Receipt) => {
     setEditingReceipt(receipt);
     setActiveTab('create');
-  };
+  }, []);
 
-  const handleSuccess = () => {
+  const handleSuccess = useCallback(() => {
     setEditingReceipt(null);
     setActiveTab('history');
-  };
+  }, []);
 
   // If no profile is set up, redirect to settings on first load
   useEffect(() => {
-    if (!profile.name && !loading) {
+    if (user && !profile.name && !profileLoading && !authLoading) {
       setActiveTab('settings');
     }
-  }, [profile.name, loading]);
+  }, [user, profile.name, profileLoading, authLoading]);
 
-  if (loading) {
+  if (renderError) {
+    return <ErrorFallback error={renderError} />;
+  }
+
+  if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
-          <p className="text-sm text-gray-500 font-medium">Iniciando sistema...</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-gray-100 rounded-full"></div>
+            <div className="absolute inset-0 w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-lg font-black tracking-tighter uppercase italic">Recibo<span className="text-gray-400">Pro</span></p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Iniciando sistema seguro...</p>
+          </div>
         </div>
       </div>
     );
