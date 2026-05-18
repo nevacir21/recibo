@@ -1,0 +1,8 @@
+{
+  "name": "Gerador de Recibo PDF",
+  "description": "Sistema completo para geração, armazenamento e busca de recibos de prestação de serviços com exportação em PDF.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

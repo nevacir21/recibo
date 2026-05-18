@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Master Gate catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 2. Validation Blueprints
+    function isValidReceipt(data) {
+      return data.companyName is string && data.companyName.size() <= 200 &&
+             data.clientName is string && data.clientName.size() <= 200 &&
+             data.total is number &&
+             data.userId == request.auth.uid;
+    }
+
+    function isValidCompanyProfile(data) {
+      return data.name is string && data.name.size() <= 200 &&
+             data.userId == request.auth.uid;
+    }
+
+    // 3. Collection Rules
+    match /receipts/{receiptId} {
+      allow read: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn() && 
+                      isValidId(receiptId) && 
+                      isValidReceipt(incoming()) &&
+                      incoming().createdAt == request.time;
+      
+      allow update: if isSignedIn() && 
+                      existing().userId == request.auth.uid && 
+                      isValidReceipt(incoming()) &&
+                      incoming().userId == existing().userId &&
+                      incoming().createdAt == existing().createdAt;
+      
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    match /company_profiles/{userId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      
+      allow create: if isSignedIn() && 
+                      userId == request.auth.uid && 
+                      isValidCompanyProfile(incoming());
+      
+      allow update: if isSignedIn() && 
+                      userId == request.auth.uid && 
+                      isValidCompanyProfile(incoming()) &&
+                      incoming().userId == userId;
+                      
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+  }
+}

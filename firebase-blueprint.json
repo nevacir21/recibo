@@ -1,0 +1,46 @@
+{
+  "entities": {
+    "Receipt": {
+      "title": "Recibo",
+      "description": "Dados de um recibo de prestação de serviços",
+      "type": "object",
+      "properties": {
+        "companyName": { "type": "string", "description": "Nome da empresa" },
+        "companyDetails": { "type": "string", "description": "Detalhes da empresa (CNPJ, Endereço, etc)" },
+        "companyLogo": { "type": "string", "description": "URL ou Base64 do logo" },
+        "clientName": { "type": "string", "description": "Nome do cliente" },
+        "serviceDescription": { "type": "string", "description": "Descrição do serviço prestado" },
+        "laborCost": { "type": "number", "description": "Valor da mão de obra" },
+        "parts": { "type": "array", "description": "Lista de peças trocadas" },
+        "expenses": { "type": "object", "description": "Gastos com transporte" },
+        "total": { "type": "number", "description": "Valor total do recibo" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Data de criação" },
+        "userId": { "type": "string", "description": "ID do usuário que criou" }
+      },
+      "required": ["companyName", "clientName", "total", "createdAt", "userId"]
+    },
+    "CompanyProfile": {
+      "title": "Perfil da Empresa",
+      "description": "Dados da empresa de um usuário",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "details": { "type": "string" },
+        "pixKey": { "type": "string" },
+        "logo": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["name", "userId"]
+    }
+  },
+  "firestore": {
+    "receipts/{receiptId}": {
+      "schema": "Receipt",
+      "description": "Coleção de recibos salvos"
+    },
+    "company_profiles/{userId}": {
+      "schema": "CompanyProfile",
+      "description": "Perfil da empresa por usuário"
+    }
+  }
+}
