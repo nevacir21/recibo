@@ -25,15 +25,11 @@ service cloud.firestore {
 
     // 2. Validation Blueprints
     function isValidReceipt(data) {
-      return data.companyName is string && data.companyName.size() <= 200 &&
-             data.clientName is string && data.clientName.size() <= 200 &&
-             data.total is number &&
-             data.userId == request.auth.uid;
+      return data.userId == request.auth.uid;
     }
 
     function isValidCompanyProfile(data) {
-      return data.name is string && data.name.size() <= 200 &&
-             data.userId == request.auth.uid;
+      return data.userId == request.auth.uid;
     }
 
     // 3. Collection Rules
@@ -59,13 +55,10 @@ service cloud.firestore {
       allow read: if isSignedIn() && userId == request.auth.uid;
       
       allow create: if isSignedIn() && 
-                      userId == request.auth.uid && 
-                      isValidCompanyProfile(incoming());
+                      userId == request.auth.uid;
       
       allow update: if isSignedIn() && 
-                      userId == request.auth.uid && 
-                      isValidCompanyProfile(incoming()) &&
-                      incoming().userId == userId;
+                      userId == request.auth.uid;
                       
       allow delete: if isSignedIn() && userId == request.auth.uid;
     }

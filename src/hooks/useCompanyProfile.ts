@@ -23,24 +23,39 @@ export function useCompanyProfile() {
         return;
       }
 
+      // 1. Initial Load from Local Storage for instant UI response
+      const cached = localStorage.getItem('company_profile');
+      if (cached) {
+        try {
+          const localData = JSON.parse(cached);
+          if (localData && localData.name) {
+            setProfile(localData);
+          }
+        } catch (e) {
+          console.error('Error parsing cached profile', e);
+        }
+      }
+
+      // 2. Fetch from Firebase for the "source of truth"
       try {
         const docRef = doc(db, 'company_profiles', user.uid);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
-          setProfile(docSnap.data() as CompanyProfile);
-        } else {
-          // Check local storage for legacy data and migrate
-          const saved = localStorage.getItem('company_profile');
-          if (saved) {
-            const localData = JSON.parse(saved);
-            const initialProfile = { ...localData, userId: user.uid };
-            await setDoc(docRef, initialProfile);
-            setProfile(initialProfile);
+          const remoteData = docSnap.data() as CompanyProfile;
+          setProfile(remoteData);
+          localStorage.setItem('company_profile', JSON.stringify(remoteData));
+        } else if (cached) {
+          // If Firestore is empty but we have local data, migrate it to Firestore
+          const localData = JSON.parse(cached);
+          const profileToSync = { ...localData, userId: user.uid };
+          if (profileToSync.name) {
+            await setDoc(docRef, profileToSync);
+            console.log('Migrated local profile to Firestore');
           }
         }
       } catch (error) {
-        console.error('Error loading profile:', error);
+        console.error('Error loading profile from Firestore:', error);
       } finally {
         setLoading(false);
       }

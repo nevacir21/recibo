@@ -60,11 +60,19 @@ export default function App() {
     }
   }, [user, profile.name, profileLoading, authLoading]);
 
+  const handleLogout = async () => {
+    if (confirm('Deseja realmente sair do sistema?')) {
+      const { logout } = (await import('./lib/firebase'));
+      await logout();
+      window.location.reload();
+    }
+  };
+
   if (renderError) {
     return <ErrorFallback error={renderError} />;
   }
 
-  if (authLoading) {
+  if (authLoading || (user && profileLoading && !profile.name)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-6">
@@ -74,7 +82,7 @@ export default function App() {
           </div>
           <div className="text-center space-y-1">
             <p className="text-lg font-black tracking-tighter uppercase italic">Recibo<span className="text-gray-400">Pro</span></p>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Iniciando sistema seguro...</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Sincronizando seus dados...</p>
           </div>
         </div>
       </div>
@@ -107,8 +115,11 @@ export default function App() {
               <ReceiptIcon size={24} />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Recibo<span className="text-gray-400">Pro</span></h1>
-              <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Manutenção & Serviços</p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight">Recibo<span className="text-gray-400">Pro</span></h1>
+                {profile.name && <span className="text-[9px] bg-black text-white px-1.5 py-0.5 rounded font-black uppercase italic">{profile.name}</span>}
+              </div>
+              <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Logado como: {user.email}</p>
             </div>
           </div>
           <Auth />
@@ -121,7 +132,10 @@ export default function App() {
           <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">
             <ReceiptIcon size={18} />
           </div>
-          <h1 className="text-lg font-bold tracking-tight">Recibo<span className="text-gray-400">Pro</span></h1>
+          <div>
+            <h1 className="text-lg font-bold tracking-tight">Recibo<span className="text-gray-400">Pro</span></h1>
+            {profile.name && <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest truncate max-w-[120px]">{profile.name}</p>}
+          </div>
         </div>
         <Auth />
       </header>
