@@ -226,7 +226,8 @@ export const generateReceiptPDF = async (receipt: Receipt) => {
           return `${tag}${len}${value}`;
         };
         
-        let pixKeyUsed = receipt.pixKey.trim();
+        let pixKeyUsed = (receipt.pixKey || '').trim();
+        if (!pixKeyUsed) throw new Error('Pix key empty');
         const digitsOnly = pixKeyUsed.replace(/\D/g, '');
         
         // Lógica de limpeza e formatação da chave

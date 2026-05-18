@@ -198,28 +198,33 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
     setIsSaving(true);
     const total = calculateTotal();
 
-    const receiptData: Omit<Receipt, 'id'> = {
+    const receiptData: any = {
       type,
       companyName,
       companyDetails,
       clientName,
-      services: services.filter(s => s.description.trim() !== ''),
-      laborCost: Number(laborCost),
-      parts: parts.map(p => ({ ...p, price: Number(p.price) })),
+      services: services.filter(s => s.description.trim() !== '').map(s => ({
+        ...s,
+        value: s.value ?? 0,
+        photoBefore: s.photoBefore ?? null,
+        photoAfter: s.photoAfter ?? null
+      })),
+      laborCost: Number(laborCost) || 0,
+      parts: parts.map(p => ({ ...p, price: Number(p.price) || 0 })),
       expenses: {
-        gasoline: Number(expenses.gasoline),
-        toll: Number(expenses.toll),
-        other: Number(expenses.other),
+        gasoline: Number(expenses.gasoline) || 0,
+        toll: Number(expenses.toll) || 0,
+        other: Number(expenses.other) || 0,
       },
       total,
       createdAt: new Date().toISOString(),
       serviceDate,
       osNumber,
-      mileageInitial: mileageInitial === '' ? undefined : Number(mileageInitial),
-      mileageFinal: mileageFinal === '' ? undefined : Number(mileageFinal),
-      dashboardPhoto,
-      companyLogo: profile.logo,
-      pixKey: profile.pixKey,
+      mileageInitial: mileageInitial === '' ? null : Number(mileageInitial),
+      mileageFinal: mileageFinal === '' ? null : Number(mileageFinal),
+      dashboardPhoto: dashboardPhoto ?? null,
+      companyLogo: profile.logo ?? null,
+      pixKey: profile.pixKey ?? null,
       userId,
     };
 
