@@ -34,33 +34,15 @@ service cloud.firestore {
 
     // 3. Collection Rules
     match /receipts/{receiptId} {
-      allow read: if isSignedIn() && existing().userId == request.auth.uid;
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
-      
-      allow create: if isSignedIn() && 
-                      isValidId(receiptId) && 
-                      isValidReceipt(incoming()) &&
-                      incoming().createdAt == request.time;
-      
-      allow update: if isSignedIn() && 
-                      existing().userId == request.auth.uid && 
-                      isValidReceipt(incoming()) &&
-                      incoming().userId == existing().userId &&
-                      incoming().createdAt == existing().createdAt;
-      
-      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+      allow read, list: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
 
     match /company_profiles/{userId} {
       allow read: if isSignedIn() && userId == request.auth.uid;
-      
-      allow create: if isSignedIn() && 
-                      userId == request.auth.uid;
-      
-      allow update: if isSignedIn() && 
-                      userId == request.auth.uid;
-                      
-      allow delete: if isSignedIn() && userId == request.auth.uid;
+      allow write: if isSignedIn() && userId == request.auth.uid;
     }
   }
 }

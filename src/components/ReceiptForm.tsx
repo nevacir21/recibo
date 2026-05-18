@@ -242,13 +242,15 @@ export const ReceiptForm: React.FC<ReceiptFormProps> = ({ userId, onSuccess, ini
       if (db) {
         if (initialData?.id) {
           try {
+            // Don't overwrite createdAt on update, and only send what changed or is needed
+            const { createdAt, ...updateData } = receiptData;
             await updateDoc(doc(db, 'receipts', initialData.id), {
-              ...receiptData,
+              ...updateData,
               updatedAt: serverTimestamp(),
             });
           } catch (error) {
             handleFirestoreError(error, OperationType.UPDATE, `receipts/${initialData.id}`);
-            return; // Stop execution if Firestore fails
+            return;
           }
         } else {
           try {
